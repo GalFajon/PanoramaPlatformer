@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        canvas {
+            position:fixed;
+            left:0;
+            top:0;
+        }
+    </style>
+
+    <title>Panorama platformer</title>
+    <script type="text/javascript" src="../lib/gl-matrix-min.js"></script>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script type="module">
+        import {Game} from './Game.js';
+
+        const canvas = document.querySelector('canvas');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const app = new Game(canvas);
+        await app.init();
+    </script>
+</body>
+</html>
