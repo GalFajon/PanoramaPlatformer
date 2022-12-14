@@ -1,5 +1,7 @@
 export class CollisionManager {
-    constructor() {}
+    constructor(game) {
+        this.game = game;
+    }
 
     init (player,platforms,enemies,coins) {
         this.player = player;
@@ -24,6 +26,14 @@ export class CollisionManager {
 
         for (let platform of this.platforms) {
             if (CollisionManager.checkCollision(this.player,platform) && platform.node.translation[1] < (this.player.node.translation[1] - this.player.bbox[2])) ppcol = true;
+        }
+
+        for (let coin of this.coins) {
+            if (CollisionManager.checkCollision(this.player,coin)) {
+                this.game.scene.removeNode(coin.node);
+                this.coins.splice(this.coins.indexOf(coin),1);
+                this.game.state.collected += 1;
+            }
         }
 
         if (this.player.states.CURRENT_STATE != this.player.states.JUMPING) {

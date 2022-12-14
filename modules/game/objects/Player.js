@@ -36,13 +36,10 @@ export class Player extends GameObject {
     }
 
     setState(state) {
-        console.log("SETTING STATE:", state)
         this.states.CURRENT_STATE = state;
     }
 
-    update(state, dt) { 
-        console.log(this.states.CURRENT_STATE);
-        
+    update(state, dt) {         
         if (this.jumpTimer > 0 && this.states.CURRENT_STATE == this.states.JUMPING) this.jumpTimer -= dt;
         else if(this.states.CURRENT_STATE == this.states.JUMPING) {
             this.jumpTimer = 0;

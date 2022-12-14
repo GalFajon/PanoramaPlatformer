@@ -16,12 +16,15 @@ export class GameController {
         this.enemies = [];
         this.coins = [];
 
-        this.state = {};
+        this.state = {
+            collected: 0
+        };
 
         this.inputManager = new InputManager();
-        this.collisionManager = new CollisionManager();
+        this.collisionManager = new CollisionManager(this);
 
         this.startTime = 0;
+        this.scene = scene;
         this.init(scene);
     }
 
@@ -53,5 +56,7 @@ export class GameController {
 
         vec3.sub(ppos,apos,ppos)
         this.camera.translation = vec3.add(this.camera.translation,this.camera.translation,ppos);
+
+        for (let coin of this.coins) coin.update(this.state,dt);
     }
 }
