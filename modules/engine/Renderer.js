@@ -4,13 +4,16 @@ import { WebGL } from './WebGL.js';
 
 import { shaders } from './shaders.js';
 
+import { ShadowFactory } from './ShadowFactory.js';
 // This class prepares all assets for use with WebGL
 // and takes care of rendering.
 
 export class Renderer {
 
-    constructor(gl) {
+    constructor(gl, shadowFactory) {
         this.gl = gl;
+
+        this.shadowFactory = shadowFactory;
 
         this.glObjects = new Map();
         this.programs = WebGL.buildPrograms(gl, shaders);
@@ -140,11 +143,11 @@ export class Renderer {
             const accessor = primitive.attributes[name];
             const bufferView = accessor.bufferView;
             const attributeIndex = attributeNameToIndexMap[name];
-
             if (attributeIndex !== undefined) {
                 bufferView.target = gl.ARRAY_BUFFER;
                 const buffer = this.prepareBufferView(bufferView);
                 gl.bindBuffer(bufferView.target, buffer);
+
                 gl.enableVertexAttribArray(attributeIndex);
                 gl.vertexAttribPointer(
                     attributeIndex,
@@ -189,19 +192,23 @@ export class Renderer {
     }
 
     render(scene, camera) {
-        this.renderWithBasicLighting(scene,camera);
+        this.renderDepthMap(scene,camera);
+        this.renderShadows(scene,camera);
+        //this.renderWithBasicLighting(scene,camera);
     }
 
     renderWithBasicLighting(scene,camera) {
         const gl = this.gl;
 
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
         const mvpMatrix = this.getViewProjectionMatrix(camera);
         const { program, uniforms } = this.programs.simple;
 
         gl.useProgram(program);
+
         gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
         gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
         gl.uniform3fv(uniforms.uLightDir,[0.3,0.8,0.5]);
 
@@ -210,7 +217,48 @@ export class Renderer {
         }
     }
 
-    renderNode(node, mvpMatrix, program, uniforms) {
+    renderDepthMap(scene,camera) {
+        const gl = this.gl;
+
+        const { program, uniforms } = this.programs.simple;
+
+        gl.useProgram(program);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.shadowFactory.frameBuffer);
+        gl.viewport(0, 0, this.shadowFactory.textureSize, this.shadowFactory.textureSize);
+
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+
+        for (const node of scene.nodes) {
+            this.renderNode(node, this.shadowFactory.matrix, program, uniforms, camera);
+        }
+
+    }
+
+    renderShadows(scene,camera) {
+        const gl = this.gl;
+        const mvpMatrix = this.getViewProjectionMatrix(camera);
+        const { program, uniforms } = this.programs.projection;
+
+        gl.useProgram(program);
+        gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+        gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, this.shadowFactory.texture);
+
+        gl.uniformMatrix4fv(uniforms.u_textureMatrix, false, this.shadowFactory.textureMat);
+        gl.uniform1i(uniforms.u_projectedTexture, 1);
+        gl.uniform3fv(uniforms.uLightDir,[0.3,0.8,0.5]);
+
+        for (const node of scene.nodes) {
+            this.renderNode(node, mvpMatrix, program, uniforms, camera);
+        }
+    }
+
+    renderNode(node, mvpMatrix, program, uniforms, camera) {
         const gl = this.gl;
 
         mvpMatrix = mat4.clone(mvpMatrix);
@@ -218,13 +266,15 @@ export class Renderer {
 
         if (node.mesh) {
             gl.uniformMatrix4fv(uniforms.uModelViewProjection, false, mvpMatrix);
+            gl.uniformMatrix4fv(uniforms.uNodePosition, false, node.localMatrix);
+
             for (const primitive of node.mesh.primitives) {
                 this.renderPrimitive(primitive, program, uniforms);
             }
         }
 
         for (const child of node.children) {
-            this.renderNode(child, mvpMatrix, program, uniforms);
+            this.renderNode(child, mvpMatrix, program, uniforms, camera);
         }
     }
 

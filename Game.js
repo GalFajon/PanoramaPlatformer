@@ -2,6 +2,7 @@ import { Application } from './modules/engine/Application.js';
 
 import { GLTFLoader } from './modules/engine/GLTFLoader.js';
 import { Renderer } from './modules/engine/Renderer.js';
+import { ShadowFactory } from './modules/engine/ShadowFactory.js';
 
 import { GameController } from './modules/game/GameController.js';
 import { LevelManager } from './modules/game/managers/LevelManager.js';
@@ -9,9 +10,11 @@ import { LevelManager } from './modules/game/managers/LevelManager.js';
 export class Game extends Application {
 
     async start() {        
-        this.renderer = new Renderer(this.gl);
+        this.shadowFactory = new ShadowFactory(this.gl);
+        this.renderer = new Renderer(this.gl, this.shadowFactory);
+
         this.levelManager = new LevelManager(this.renderer);
-        this.gameController = new GameController(this.levelManager);
+        this.gameController = new GameController(this.levelManager, this.shadowFactory);
 
         await this.levelManager.load('./scenes/gltf/test/test.gltf')
 

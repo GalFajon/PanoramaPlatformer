@@ -9,7 +9,9 @@ import {CollisionManager} from './managers/CollisionManager.js';
 import { vec3, quat } from '../../lib/gl-matrix-module.js';
 
 export class GameController {
-    constructor(levelManager) {
+    constructor(levelManager, shadowFactory) {
+        this.shadowFactory = shadowFactory;
+
         this.player = undefined;
         this.camera = undefined;
         
@@ -53,7 +55,11 @@ export class GameController {
 
         this.camera.translation = vec3.add(this.camera.translation,this.player.node.translation, [0,12,22])
         this.camera.rotation = [-0.25, 0, 0, 0.97];
-        this.camera.camera.fov = 0.8;
+
+        this.camera.camera.fov = 0.6;
+        this.camera.camera.far = 60;
+        this.camera.camera.near = 1;
+
         this.camera.camera.updateProjectionMatrix();
 
         this.collisionManager.init(this.player,this.platforms,this.enemies,this.coins,this.levelGates);
@@ -76,6 +82,10 @@ export class GameController {
 
             vec3.sub(ppos,apos,ppos)
             this.camera.translation = vec3.add(this.camera.translation,this.camera.translation,ppos);
+            this.shadowFactory.position = [ this.player.node.translation[0], this.player.node.translation[1] + 10, this.player.node.translation[2]+0.5 ];
+            this.shadowFactory.target = [ this.player.node.translation[0], this.player.node.translation[1], this.player.node.translation[2] ];
+
+            this.shadowFactory.updateMatrix();
 
             for (let coin of this.coins) coin.update(this,dt);
             for (let enemy of this.enemies) enemy.update(this,dt);
