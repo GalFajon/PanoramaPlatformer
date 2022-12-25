@@ -1,9 +1,11 @@
 import { GameObject } from './GameObject.js';
 import { quat, vec3, mat4 } from '../../../lib/gl-matrix-module.js';
 
-export class Coin extends GameObject {
+export class LevelGate extends GameObject {
     constructor(node) {
         super(node);
+        
+        this.level = node.extras.level;
     }
 
     update(game,dt) {

@@ -7,7 +7,7 @@ export class GameObject {
 
             POZOR: Y in Z sta zamenjana (to kar je v blenderju Z je v enginu Y)
         */
-        if (this.node.extras.bbox) this.bbox = this.node.extras.bbox;
-        else console.error("Bounding box not assigned. Add it as a custom property in Blender.");
+        //if (this.node.extras.bbox) this.bbox = this.node.extras.bbox;
+        //else console.error("Bounding box not assigned. Add it as a custom property in Blender.");
     }
 }

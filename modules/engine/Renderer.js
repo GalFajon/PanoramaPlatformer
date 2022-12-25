@@ -1,4 +1,4 @@
-import { mat4 } from '../../lib/gl-matrix-module.js';
+import { mat4, vec3 } from '../../lib/gl-matrix-module.js';
 
 import { WebGL } from './WebGL.js';
 
@@ -11,6 +11,7 @@ export class Renderer {
 
     constructor(gl) {
         this.gl = gl;
+
         this.glObjects = new Map();
         this.programs = WebGL.buildPrograms(gl, shaders);
 
@@ -30,13 +31,13 @@ export class Renderer {
             wrapS: gl.CLAMP_TO_EDGE,
             wrapT: gl.CLAMP_TO_EDGE,
         });
+
     }
 
     prepareBufferView(bufferView) {
         if (this.glObjects.has(bufferView)) {
             return this.glObjects.get(bufferView);
         }
-
         const buffer = new DataView(
             bufferView.buffer,
             bufferView.byteOffset,
@@ -45,6 +46,7 @@ export class Renderer {
             target : bufferView.target,
             data   : buffer
         });
+
         this.glObjects.set(bufferView, glBuffer);
         return glBuffer;
     }
@@ -187,23 +189,29 @@ export class Renderer {
     }
 
     render(scene, camera) {
+        this.renderWithBasicLighting(scene,camera);
+    }
+
+    renderWithBasicLighting(scene,camera) {
         const gl = this.gl;
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        const { program, uniforms } = this.programs.simple;
-        gl.useProgram(program);
-
         const mvpMatrix = this.getViewProjectionMatrix(camera);
+        const { program, uniforms } = this.programs.simple;
+
+        gl.useProgram(program);
+        gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+        gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+        gl.uniform3fv(uniforms.uLightDir,[0.3,0.8,0.5]);
+
         for (const node of scene.nodes) {
-            this.renderNode(node, mvpMatrix);
+            this.renderNode(node, mvpMatrix, program, uniforms);
         }
     }
 
-    renderNode(node, mvpMatrix) {
+    renderNode(node, mvpMatrix, program, uniforms) {
         const gl = this.gl;
-
-        const { program, uniforms } = this.programs.simple;
 
         mvpMatrix = mat4.clone(mvpMatrix);
         mat4.mul(mvpMatrix, mvpMatrix, node.localMatrix);
@@ -211,19 +219,17 @@ export class Renderer {
         if (node.mesh) {
             gl.uniformMatrix4fv(uniforms.uModelViewProjection, false, mvpMatrix);
             for (const primitive of node.mesh.primitives) {
-                this.renderPrimitive(primitive);
+                this.renderPrimitive(primitive, program, uniforms);
             }
         }
 
         for (const child of node.children) {
-            this.renderNode(child, mvpMatrix);
+            this.renderNode(child, mvpMatrix, program, uniforms);
         }
     }
 
-    renderPrimitive(primitive) {
+    renderPrimitive(primitive, program, uniforms) {
         const gl = this.gl;
-
-        const { program, uniforms } = this.programs.simple;
 
         const vao = this.glObjects.get(primitive);
         gl.bindVertexArray(vao);
@@ -241,7 +247,7 @@ export class Renderer {
         const glSampler = texture
                         ? this.glObjects.get(texture.sampler)
                         : this.defaultSampler;
-
+        
         gl.bindTexture(gl.TEXTURE_2D, glTexture);
         gl.bindSampler(0, glSampler);
 

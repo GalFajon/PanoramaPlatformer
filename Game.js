@@ -4,35 +4,24 @@ import { GLTFLoader } from './modules/engine/GLTFLoader.js';
 import { Renderer } from './modules/engine/Renderer.js';
 
 import { GameController } from './modules/game/GameController.js';
+import { LevelManager } from './modules/game/managers/LevelManager.js';
 
 export class Game extends Application {
 
     async start() {        
-        this.loader = new GLTFLoader();
-        await this.loader.load('./scenes/gltf/test/level0.gltf');
-
-        this.scene = await this.loader.loadScene(this.loader.defaultScene);
-        this.camera = await this.loader.loadNode('Camera');
-
-        this.gameController = new GameController(this.scene);
-
-        if (!this.scene || !this.camera) {
-            throw new Error('Scene or Camera not present in glTF');
-        }
-
-        if (!this.camera.camera) {
-            throw new Error('Camera node does not contain a camera reference');
-        }
-
         this.renderer = new Renderer(this.gl);
-        this.renderer.prepareScene(this.scene);
-        this.resize();
+        this.levelManager = new LevelManager(this.renderer);
+        this.gameController = new GameController(this.levelManager);
 
+        await this.levelManager.load('./scenes/gltf/test/test.gltf')
+
+        this.gameController.init(this.levelManager.scene);
+        this.resize();
     }
 
     render() {
         if (this.renderer) {
-            this.renderer.render(this.scene, this.camera);
+            this.renderer.render(this.levelManager.scene, this.levelManager.camera);
         }
     }
 
@@ -41,12 +30,14 @@ export class Game extends Application {
         const h = this.canvas.clientHeight;
         const aspectRatio = w / h;
 
-        if (this.camera) {
-            this.camera.camera.aspect = aspectRatio;
-            this.camera.camera.updateProjectionMatrix();
+        if (this.levelManager.camera) {
+            this.levelManager.camera.camera.aspect = aspectRatio;
+            this.levelManager.camera.camera.updateProjectionMatrix();
         }
     }
 
-    update() { this.gameController.update(); }
+    update() { 
+        if (this.gameController.shouldUpdate) this.gameController.update();
+    }
 
 }

@@ -22,9 +22,13 @@ export class Player extends GameObject {
 
         this.gravity = 2;
 
-        this.jumpTime = 0.5;
+        this.jumpTime = 1;
         this.jumpTimer = this.jumpTime;
         this.jumpSpeed = 3;
+
+        this.timeSinceLastHurt = 0;
+
+        this.health = 3;
 
         this.states = {
             CURRENT_STATE: "FALLING",
@@ -39,7 +43,9 @@ export class Player extends GameObject {
         this.states.CURRENT_STATE = state;
     }
 
-    update(state, dt) {         
+    update(game, dt) {       
+        this.timeSinceLastHurt += dt;
+        
         if (this.jumpTimer > 0 && this.states.CURRENT_STATE == this.states.JUMPING) this.jumpTimer -= dt;
         else if(this.states.CURRENT_STATE == this.states.JUMPING) {
             this.jumpTimer = 0;
@@ -48,11 +54,11 @@ export class Player extends GameObject {
 
         const acc = vec3.create();
 
-        if (state.inputs['KeyW']) vec3.add(acc, acc, this.directions.forward);
-        if (state.inputs['KeyS']) vec3.sub(acc, acc, this.directions.forward);
-        if (state.inputs['KeyD']) vec3.add(acc, acc, this.directions.right);
-        if (state.inputs['KeyA']) vec3.sub(acc, acc, this.directions.right);
-        if (state.inputs['Space']) { 
+        if (game.state.inputs['KeyW']) vec3.add(acc, acc, this.directions.forward);
+        if (game.state.inputs['KeyS']) vec3.sub(acc, acc, this.directions.forward);
+        if (game.state.inputs['KeyD']) vec3.add(acc, acc, this.directions.right);
+        if (game.state.inputs['KeyA']) vec3.sub(acc, acc, this.directions.right);
+        if (game.state.inputs['Space']) { 
             if (this.states.CURRENT_STATE == this.states.STANDING) {
                 this.setState("JUMPING"); 
                 this.jumpTimer = this.jumpTime; 
@@ -72,7 +78,7 @@ export class Player extends GameObject {
             vec3.scale(gravity, gravity, dt * this.gravity);
         }
 
-        if (!state.inputs['KeyW'] && !state.inputs['KeyS'] && !state.inputs['KeyD'] && !state.inputs['KeyA']) this.velocity = [0,0,0];
+        if (!game.state.inputs['KeyW'] && !game.state.inputs['KeyS'] && !game.state.inputs['KeyD'] && !game.state.inputs['KeyA']) this.velocity = [0,0,0];
 
         const speed = vec3.length(this.velocity);
         if (speed > this.maxSpeed) vec3.scale(this.velocity, this.velocity, this.maxSpeed / speed);
