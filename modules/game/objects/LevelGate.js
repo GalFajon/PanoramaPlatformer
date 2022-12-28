@@ -4,7 +4,7 @@ import { quat, vec3, mat4 } from '../../../lib/gl-matrix-module.js';
 export class LevelGate extends GameObject {
     constructor(node) {
         super(node);
-        
+        this.bbox = node.scale;
         this.level = node.extras.level;
     }
 

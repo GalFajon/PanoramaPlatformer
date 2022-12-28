@@ -344,6 +344,8 @@ export class GLTFLoader {
             }
         }
 
+        if (gltfSpec.extras) options.extras = gltfSpec.extras;
+
         const scene = new Scene(options);
         this.cache.set(gltfSpec, scene);
         return scene;

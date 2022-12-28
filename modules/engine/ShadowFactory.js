@@ -106,7 +106,8 @@ export class ShadowFactory {
         uniform sampler2D uBaseColorTexture;
         uniform vec4 uBaseColorFactor;
         uniform sampler2D u_projectedTexture;
-        uniform vec3 uLightDir;
+        uniform vec4 uLightDir;
+        uniform mat4 uNodePosition;
 
         out vec4 outColor;
         
@@ -127,33 +128,8 @@ export class ShadowFactory {
             outColor = vec4(texColor.rgb * shadowLight, texColor.a);
 
             vec3 normal = normalize(vNormal);
-            float light = dot(normal, uLightDir);
-            outColor.rgb *= light*1.3; //+ (inRange ? 0.0 : 1.0 * 0.1);
+            float light = dot(normal, (uLightDir * uNodePosition).xyz);
+            outColor.rgb *= light;
           }`;
-
-        /*
-                void main() {
-            
-
-          vec3 projectedTexcoord = v_projectedTexcoord.xyz / v_projectedTexcoord.w;
-         
-          bool inRange = 
-              projectedTexcoord.x >= -1.0 &&
-              projectedTexcoord.x <= 1.0 &&
-              projectedTexcoord.y >= -1.0 &&
-              projectedTexcoord.y <= 1.0;
-        
-          vec4 projectedTexColor = vec4(texture(u_projectedTexture, projectedTexcoord.xy).rrr, 255);
-
-          vec4 texColor = texture(uBaseColorTexture, v_texcoord);
-         
-          vec3 normal = normalize(vNormal);
-          float light = dot(normal, uLightDir);
-
-          float projectedAmount = inRange ? 1.0 : 0.0;
-          outColor = mix(texColor * uBaseColorFactor, projectedTexColor, projectedAmount);
-          //outColor.rgb *= light*1.3;
-        }
-        */
     }
 }

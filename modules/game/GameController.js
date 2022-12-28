@@ -44,12 +44,12 @@ export class GameController {
         this.coins = [];
         this.levelGates = [];
 
-        for (let i=0; i < scene.nodes.length; i++) {            
-            if (scene.nodes[i].name == "Player") this.player = new Player(scene.nodes[i]);        
+        for (let i=0; i < scene.nodes.length; i++) {        
+            if (scene.nodes[i].name == "Player") this.player = new Player(scene.nodes[i], [ scene.extras.playerbbox[0], scene.extras.playerbbox[2], scene.extras.playerbbox[1] ] );        
             if (scene.nodes[i].name == "Camera") this.camera = scene.nodes[i];
             if (scene.nodes[i].name.startsWith("Platform")) this.platforms.push(new Platform(scene.nodes[i]));
-            if (scene.nodes[i].name.startsWith("Enemy")) this.enemies.push(new Enemy(scene.nodes[i]));
-            if (scene.nodes[i].name.startsWith("Coin")) this.coins.push(new Coin(scene.nodes[i]));
+            if (scene.nodes[i].name.startsWith("Enemy")) this.enemies.push(new Enemy(scene.nodes[i], [ scene.extras.enemybbox[0], scene.extras.enemybbox[2], scene.extras.enemybbox[1] ]));
+            if (scene.nodes[i].name.startsWith("Coin")) this.coins.push(new Coin(scene.nodes[i], [ scene.extras.coinbbox[0], scene.extras.coinbbox[2], scene.extras.coinbbox[1] ]));
             if (scene.nodes[i].name.startsWith("LevelGate")) this.levelGates.push(new LevelGate(scene.nodes[i]));
         }
 
@@ -78,6 +78,15 @@ export class GameController {
 
             let ppos = vec3.clone(this.player.node.translation);
             this.player.update(this,dt);
+
+            if (this.player.node.translation[1] < -5) {
+                this.shouldUpdate = false;
+                this.levelManager.load(this.levelManager.currentLevel, function() {
+                    this.init(this.levelManager.scene);
+                    this.shouldUpdate = true;
+                }.bind(this));
+            }
+
             let apos = vec3.clone(this.player.node.translation)
 
             vec3.sub(ppos,apos,ppos)

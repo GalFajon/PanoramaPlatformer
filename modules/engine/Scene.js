@@ -1,6 +1,7 @@
 export class Scene {
 
     constructor(options = {}) {
+        this.extras = options.extras;
         this.nodes = [...(options.nodes ?? [])];
     }
 

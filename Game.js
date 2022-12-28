@@ -13,10 +13,10 @@ export class Game extends Application {
         this.shadowFactory = new ShadowFactory(this.gl);
         this.renderer = new Renderer(this.gl, this.shadowFactory);
 
-        this.levelManager = new LevelManager(this.renderer);
+        this.levelManager = new LevelManager(this.renderer, this);
         this.gameController = new GameController(this.levelManager, this.shadowFactory);
 
-        await this.levelManager.load('./scenes/gltf/test/test.gltf')
+        await this.levelManager.load('./scenes/gltf/level1/level1.gltf')
 
         this.gameController.init(this.levelManager.scene);
         this.resize();

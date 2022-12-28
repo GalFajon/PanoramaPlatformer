@@ -210,7 +210,7 @@ export class Renderer {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-        gl.uniform3fv(uniforms.uLightDir,[0.3,0.8,0.5]);
+        gl.uniform4fv(uniforms.uLightPos,[0,30,0]);
 
         for (const node of scene.nodes) {
             this.renderNode(node, mvpMatrix, program, uniforms);
@@ -251,7 +251,7 @@ export class Renderer {
 
         gl.uniformMatrix4fv(uniforms.u_textureMatrix, false, this.shadowFactory.textureMat);
         gl.uniform1i(uniforms.u_projectedTexture, 1);
-        gl.uniform3fv(uniforms.uLightDir,[0.3,0.8,0.5]);
+        gl.uniform4fv(uniforms.uLightDir,[0,1,0.7,0]);
 
         for (const node of scene.nodes) {
             this.renderNode(node, mvpMatrix, program, uniforms, camera);
@@ -259,6 +259,7 @@ export class Renderer {
     }
 
     renderNode(node, mvpMatrix, program, uniforms, camera) {
+        if (node.name.startsWith('CollisionBox') || node.name.startsWith("Platform")) return;
         const gl = this.gl;
 
         mvpMatrix = mat4.clone(mvpMatrix);
@@ -266,7 +267,7 @@ export class Renderer {
 
         if (node.mesh) {
             gl.uniformMatrix4fv(uniforms.uModelViewProjection, false, mvpMatrix);
-            gl.uniformMatrix4fv(uniforms.uNodePosition, false, node.localMatrix);
+            gl.uniformMatrix4fv(uniforms.uNodePosition, false, node.globalMatrix);
 
             for (const primitive of node.mesh.primitives) {
                 this.renderPrimitive(primitive, program, uniforms);

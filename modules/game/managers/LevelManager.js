@@ -1,12 +1,15 @@
 import { GLTFLoader } from '../../engine/GLTFLoader.js';
 
 export class LevelManager {
-    constructor(renderer) {
+    constructor(renderer, game) {
         this.loader = new GLTFLoader();
 
         this.renderer = renderer;
+        this.game = game;
+
         this.scene = null;
         this.camera = null;
+        this.currentLevel = null;
     }
 
     async retry() {
@@ -20,6 +23,9 @@ export class LevelManager {
         this.camera = await this.getCamera();
 
         this.renderer.prepareScene(this.scene);
+        this.game.resize();
+        this.currentLevel = level;
+
         if (callback) {
             callback();
         }

@@ -1,8 +1,9 @@
 import { GameObject } from './GameObject.js';
 
-export class Platform extends GameObject {
+export class Platform {
     constructor(node) {
-        super(node);
+        this.node = node;
+        this.bbox = node.scale;
     }
 
     update(state) {

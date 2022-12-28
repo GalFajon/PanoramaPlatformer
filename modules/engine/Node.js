@@ -19,7 +19,6 @@ export class Node {
             ? mat4.clone(options.matrix)
             : mat4.create();
 
-
         if (options.matrix) {
             this.updateTransformationComponents();
         } else if (options.translation || options.rotation || options.scale) {
