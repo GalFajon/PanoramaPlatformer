@@ -9,7 +9,6 @@ export class SkyboxFactory {
         this.url = url;
 
         this.updateGeometry();
-        this.updateTexture();
     }
 
     static getVertexShader() {
@@ -53,7 +52,6 @@ export class SkyboxFactory {
         let positionBuffer = gl.createBuffer();
 
         gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-        //gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]), gl.STATIC_DRAW);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]), gl.STATIC_DRAW);
 
         gl.enableVertexAttribArray(0);      

@@ -22,7 +22,7 @@ export class Game extends Application {
         this.levelManager = new LevelManager(this.renderer, this);
         this.gameController = new GameController(this.levelManager, this.shadowFactory);
 
-        await this.levelManager.load('./scenes/gltf/level1/level1.gltf')
+        await this.levelManager.load('level1')
 
         this.gameController.init(this.levelManager.scene);
         this.resize();

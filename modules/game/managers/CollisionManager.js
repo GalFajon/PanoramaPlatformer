@@ -112,7 +112,7 @@ export class CollisionManager {
         for (let levelGate of this.levelGates) {
             if (CollisionManager.checkCollision(this.player,levelGate)) {
                 this.game.shouldUpdate = false;
-                this.game.levelManager.load(`./scenes/gltf/${levelGate.level}/${levelGate.level}.gltf`, function() {
+                this.game.levelManager.load(levelGate.level, function() {
                     this.game.init(this.game.levelManager.scene);
                     this.game.shouldUpdate = true;
                 }.bind(this));

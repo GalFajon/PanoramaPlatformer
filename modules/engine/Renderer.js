@@ -238,7 +238,6 @@ export class Renderer {
     renderSkybox(scene,camera) {
         const gl = this.gl;
         const mvpMatrix = mat4.clone(camera.camera.projectionMatrix);
-        console.log(mvpMatrix);
         mat4.rotate(mvpMatrix, mvpMatrix, (camera.translation[0] * 0.05), [0,1,0]);
         mat4.rotate(mvpMatrix, mvpMatrix, (camera.translation[1] * 0.05), [1,0,0]);
         mat4.invert(mvpMatrix,mvpMatrix);
@@ -282,7 +281,6 @@ export class Renderer {
         gl.uniform4fv(uniforms.u_fogColor,[0.5,0.5,0.5,1.0]);
         gl.uniform1f(uniforms.u_fogNear,0.6);
         gl.uniform1f(uniforms.u_fogFar,0);
-        console.log(camera.rotation);
 
         for (const node of scene.nodes) {
             this.renderNode(node, mvpMatrix, program, uniforms, camera);

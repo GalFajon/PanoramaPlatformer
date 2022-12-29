@@ -3,6 +3,7 @@ import { GLTFLoader } from '../../engine/GLTFLoader.js';
 export class LevelManager {
     constructor(renderer, game) {
         this.loader = new GLTFLoader();
+        this.background = '';
 
         this.renderer = renderer;
         this.game = game;
@@ -17,14 +18,15 @@ export class LevelManager {
     }
 
     async load(level, callback) {
-        await this.loader.load(level);
+        await this.loader.load(`./scenes/gltf/${level}/${level}.gltf`);
 
+        this.currentLevel = level;
+        
         this.scene = await this.getScene();
         this.camera = await this.getCamera();
 
         this.renderer.prepareScene(this.scene);
         this.game.resize();
-        this.currentLevel = level;
 
         if (callback) {
             callback();
@@ -33,6 +35,10 @@ export class LevelManager {
 
     async getScene() {
         let scene = await this.loader.loadScene(this.loader.defaultScene);
+                    
+        this.renderer.skyboxFactory.url = `./scenes/gltf/${this.currentLevel}/background`;
+        this.renderer.skyboxFactory.updateTexture();
+
         if (!scene) throw new Error('Scene not present in glTF');
         return scene;
     }
