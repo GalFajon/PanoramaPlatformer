@@ -2,16 +2,22 @@ import { Application } from './modules/engine/Application.js';
 
 import { GLTFLoader } from './modules/engine/GLTFLoader.js';
 import { Renderer } from './modules/engine/Renderer.js';
+
 import { ShadowFactory } from './modules/engine/ShadowFactory.js';
+import { SkyboxFactory } from './modules/engine/SkyboxFactory.js';
 
 import { GameController } from './modules/game/GameController.js';
 import { LevelManager } from './modules/game/managers/LevelManager.js';
 
 export class Game extends Application {
+    constructor(canvas, glOptions) {
+        super(canvas,glOptions);
+    }
 
     async start() {        
         this.shadowFactory = new ShadowFactory(this.gl);
-        this.renderer = new Renderer(this.gl, this.shadowFactory);
+        this.skyboxFactory = new SkyboxFactory(this.gl, '/background');
+        this.renderer = new Renderer(this.gl, this.shadowFactory, this.skyboxFactory);
 
         this.levelManager = new LevelManager(this.renderer, this);
         this.gameController = new GameController(this.levelManager, this.shadowFactory);

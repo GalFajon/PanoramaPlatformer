@@ -10,10 +10,11 @@ import { ShadowFactory } from './ShadowFactory.js';
 
 export class Renderer {
 
-    constructor(gl, shadowFactory) {
+    constructor(gl, shadowFactory, skyboxFactory) {
         this.gl = gl;
 
         this.shadowFactory = shadowFactory;
+        this.skyboxFactory = skyboxFactory;
 
         this.glObjects = new Map();
         this.programs = WebGL.buildPrograms(gl, shaders);
@@ -193,8 +194,8 @@ export class Renderer {
 
     render(scene, camera) {
         this.renderDepthMap(scene,camera);
-        this.renderShadows(scene,camera);
-        //this.renderWithBasicLighting(scene,camera);
+        this.renderSkybox(scene,camera);
+        this.renderWithShadows(scene,camera);
     }
 
     renderWithBasicLighting(scene,camera) {
@@ -228,14 +229,39 @@ export class Renderer {
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-
         for (const node of scene.nodes) {
             this.renderNode(node, this.shadowFactory.matrix, program, uniforms, camera);
         }
 
     }
 
-    renderShadows(scene,camera) {
+    renderSkybox(scene,camera) {
+        const gl = this.gl;
+        const mvpMatrix = mat4.clone(camera.camera.projectionMatrix);
+        console.log(mvpMatrix);
+        mat4.rotate(mvpMatrix, mvpMatrix, (camera.translation[0] * 0.05), [0,1,0]);
+        mat4.rotate(mvpMatrix, mvpMatrix, (camera.translation[1] * 0.05), [1,0,0]);
+        mat4.invert(mvpMatrix,mvpMatrix);
+
+        const { program, uniforms } = this.programs.skybox;
+
+        gl.useProgram(program);
+        gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+        gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+        gl.uniformMatrix4fv(uniforms.uViewDirectionProjectionInverse, false, mvpMatrix);
+
+        gl.activeTexture(gl.TEXTURE2);
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.skyboxFactory.texture);
+        gl.uniform1i(uniforms.u_skybox, 2);
+
+        gl.bindVertexArray(this.skyboxFactory.geometry);
+        gl.depthFunc(gl.LEQUAL);
+        gl.drawArrays(gl.TRIANGLES, 0, 1 * 6);        
+    }
+
+    renderWithShadows(scene,camera) {
         const gl = this.gl;
         const mvpMatrix = this.getViewProjectionMatrix(camera);
         const { program, uniforms } = this.programs.projection;
@@ -244,7 +270,7 @@ export class Renderer {
         gl.bindFramebuffer(gl.FRAMEBUFFER,null);
         gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
 
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+        this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
 
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, this.shadowFactory.texture);
@@ -252,6 +278,11 @@ export class Renderer {
         gl.uniformMatrix4fv(uniforms.u_textureMatrix, false, this.shadowFactory.textureMat);
         gl.uniform1i(uniforms.u_projectedTexture, 1);
         gl.uniform4fv(uniforms.uLightDir,[0,1,0.7,0]);
+
+        gl.uniform4fv(uniforms.u_fogColor,[0.5,0.5,0.5,1.0]);
+        gl.uniform1f(uniforms.u_fogNear,0.6);
+        gl.uniform1f(uniforms.u_fogFar,0);
+        console.log(camera.rotation);
 
         for (const node of scene.nodes) {
             this.renderNode(node, mvpMatrix, program, uniforms, camera);
@@ -268,6 +299,7 @@ export class Renderer {
         if (node.mesh) {
             gl.uniformMatrix4fv(uniforms.uModelViewProjection, false, mvpMatrix);
             gl.uniformMatrix4fv(uniforms.uNodePosition, false, node.globalMatrix);
+            gl.uniformMatrix4fv(uniforms.uCameraPosition, false, camera.globalMatrix);
 
             for (const primitive of node.mesh.primitives) {
                 this.renderPrimitive(primitive, program, uniforms);

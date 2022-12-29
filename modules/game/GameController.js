@@ -57,7 +57,7 @@ export class GameController {
         this.camera.rotation = [-0.25, 0, 0, 0.97];
 
         this.camera.camera.fov = 0.6;
-        this.camera.camera.far = 60;
+        this.camera.camera.far = 90;
         this.camera.camera.near = 1;
 
         this.camera.camera.updateProjectionMatrix();
@@ -95,6 +95,8 @@ export class GameController {
             this.shadowFactory.target = [ this.player.node.translation[0], this.player.node.translation[1], this.player.node.translation[2] ];
 
             this.shadowFactory.updateMatrix();
+            
+            //this.camera.rotation += 0.01;
 
             for (let coin of this.coins) coin.update(this,dt);
             for (let enemy of this.enemies) enemy.update(this,dt);

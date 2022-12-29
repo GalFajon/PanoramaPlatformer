@@ -1,4 +1,5 @@
 import { ShadowFactory } from "./ShadowFactory.js";
+import { SkyboxFactory } from './SkyboxFactory.js';
 
 const vertex = `#version 300 es
 
@@ -34,5 +35,6 @@ void main() {
 
 export const shaders = {
     simple: { vertex: vertex, fragment: fragment },
-    projection: { vertex: ShadowFactory.getProjectionVertexShader(), fragment: ShadowFactory.getProjectionFragmentShader() }
+    projection: { vertex: ShadowFactory.getVertexShader(), fragment: ShadowFactory.getFragmentShader() },
+    skybox: { vertex: SkyboxFactory.getVertexShader(), fragment: SkyboxFactory.getFragmentShader() }
 };

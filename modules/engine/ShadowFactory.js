@@ -71,7 +71,7 @@ export class ShadowFactory {
             0);        
     }
 
-    static getProjectionVertexShader() {
+    static getVertexShader() {
         return `#version 300 es
         layout (location = 0) in vec4 a_position;
         layout (location = 3) in vec2 a_texcoord;
@@ -80,7 +80,8 @@ export class ShadowFactory {
         uniform mat4 uModelViewProjection;
         uniform mat4 uNodePosition;
         uniform mat4 u_textureMatrix;
-         
+        uniform mat4 u_cameraPosition;
+
         out vec2 v_texcoord;
         out vec4 v_projectedTexcoord;
         out vec2 clipSpace;
@@ -90,12 +91,12 @@ export class ShadowFactory {
           gl_Position = uModelViewProjection * a_position;
           v_texcoord = a_texcoord;
           v_projectedTexcoord = u_textureMatrix * uNodePosition * a_position;
-          vNormal = aNormal;
+          vNormal = aNormal;          
         }
         `;
     }
 
-    static getProjectionFragmentShader() {
+    static getFragmentShader() {
         return `#version 300 es
         precision highp float;
          
@@ -108,6 +109,10 @@ export class ShadowFactory {
         uniform sampler2D u_projectedTexture;
         uniform vec4 uLightDir;
         uniform mat4 uNodePosition;
+        
+        uniform vec4 u_fogColor;
+        uniform float u_fogNear;
+        uniform float u_fogFar;
 
         out vec4 outColor;
         
@@ -129,7 +134,10 @@ export class ShadowFactory {
 
             vec3 normal = normalize(vNormal);
             float light = dot(normal, (uLightDir * uNodePosition).xyz);
+
             outColor.rgb *= light;
+            float fogAmount = smoothstep(0.6,1.0,(gl_FragCoord.z / gl_FragCoord.w) / 60.0);
+            outColor = mix(outColor,u_fogColor,fogAmount);
           }`;
     }
 }

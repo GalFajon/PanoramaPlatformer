@@ -21,7 +21,7 @@ export class Enemy extends GameObject {
         this.detectionRange = 20;
         this.followVertically = false;
         this.direction = [0,0,0];
-        this.health = 3;
+        this.health = 1;
 
         this.animationFrame = 0;
         this.flapScale = 1;
