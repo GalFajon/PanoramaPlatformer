@@ -50,7 +50,7 @@ export class Player extends GameObject {
         this.timeSinceLastHurt = 0;
         this.hurt = false;
 
-        this.health = 2;
+        this.health = 4;
 
         this.onFloor = false;
 

@@ -1,20 +1,18 @@
-import { mat4, vec3 } from '../../lib/gl-matrix-module.js';
-
+import { mat4 } from '../../lib/gl-matrix-module.js';
 import { WebGL } from './WebGL.js';
-
 import { shaders } from './shaders.js';
 
-import { ShadowFactory } from './ShadowFactory.js';
 // This class prepares all assets for use with WebGL
 // and takes care of rendering.
 
 export class Renderer {
 
-    constructor(gl, shadowFactory, skyboxFactory) {
+    constructor(gl, shadowFactory, skyboxFactory, uiFactory) {
         this.gl = gl;
 
         this.shadowFactory = shadowFactory;
         this.skyboxFactory = skyboxFactory;
+        this.UIFactory = uiFactory;
 
         this.glObjects = new Map();
         this.programs = WebGL.buildPrograms(gl, shaders);
@@ -196,6 +194,25 @@ export class Renderer {
         this.renderDepthMap(scene,camera);
         this.renderSkybox(scene,camera);
         this.renderWithShadows(scene,camera);
+        this.renderUI(scene,camera);
+    }
+
+    renderUI(scene,camera) {
+        const gl = this.gl;
+
+        const mvpMatrix = this.getViewProjectionMatrix(camera);
+        const { program, uniforms } = this.programs.ui;
+
+        gl.useProgram(program);
+        gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+        gl.clear(gl.DEPTH_BUFFER_BIT);
+
+        gl.activeTexture(gl.TEXTURE3);
+        gl.bindTexture(gl.TEXTURE_2D, this.UIFactory.heartTexture.texture);
+        
+        gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+        this.UIFactory.drawHealth(uniforms);
+        this.UIFactory.drawCounter(uniforms);
     }
 
     renderWithBasicLighting(scene,camera) {

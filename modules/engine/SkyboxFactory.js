@@ -88,7 +88,6 @@ export class SkyboxFactory {
           });
         });
 
-        gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
         
         this.texture = texture;

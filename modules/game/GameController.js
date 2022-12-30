@@ -9,7 +9,7 @@ import {CollisionManager} from './managers/CollisionManager.js';
 import { vec3, quat } from '../../lib/gl-matrix-module.js';
 
 export class GameController {
-    constructor(levelManager, shadowFactory) {
+    constructor(levelManager, shadowFactory, uiFactory) {
         this.shadowFactory = shadowFactory;
 
         this.player = undefined;
@@ -29,15 +29,14 @@ export class GameController {
 
         this.levelManager = levelManager;
         this.collisionManager = new CollisionManager(this);
-        
+        this.uiFactory = uiFactory;
+
         this.startTime = 0;
     }
 
     init(scene) {
         this.scene = scene;
-
-        this.player = undefined;
-        this.camera = undefined;
+        this.state.collected = 0;
         
         this.platforms = [];
         this.enemies = [];
@@ -56,13 +55,14 @@ export class GameController {
         this.camera.translation = vec3.add(this.camera.translation,this.player.node.translation, [0,12,22])
         this.camera.rotation = [-0.25, 0, 0, 0.97];
 
-        this.camera.camera.fov = 0.6;
+        this.camera.camera.fov = 0.7;
         this.camera.camera.far = 90;
         this.camera.camera.near = 1;
 
         this.camera.camera.updateProjectionMatrix();
 
         this.collisionManager.init(this.player,this.platforms,this.enemies,this.coins,this.levelGates);
+        this.uiFactory.health = this.player.health - 1;
 
         this.state.inputs = this.inputManager.keys;
         this.shouldUpdate = true;
@@ -95,8 +95,8 @@ export class GameController {
             this.shadowFactory.target = [ this.player.node.translation[0], this.player.node.translation[1], this.player.node.translation[2] ];
 
             this.shadowFactory.updateMatrix();
-            
-            //this.camera.rotation += 0.01;
+            this.uiFactory.health = this.player.health - 1;
+            this.uiFactory.counter = this.state.collected;
 
             for (let coin of this.coins) coin.update(this,dt);
             for (let enemy of this.enemies) enemy.update(this,dt);

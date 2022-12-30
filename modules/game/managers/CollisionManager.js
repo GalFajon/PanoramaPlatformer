@@ -96,6 +96,7 @@ export class CollisionManager {
                     if (this.player.timeSinceLastHurt > 1) {
                         this.player.hurt = true;
                         this.player.health--;
+                        
                         this.player.timeSinceLastHurt = 0;
                         if (this.player.health == 0) {
                             this.game.shouldUpdate = false;
