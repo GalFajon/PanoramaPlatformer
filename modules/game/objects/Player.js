@@ -87,15 +87,18 @@ export class Player extends GameObject {
     animate(dt) {
         this.animationFrame += dt;
         if (this.animationFrame > 1) this.animationFrame = 0;
+        
+        let sinValue = Math.sin((this.animationFrame*2-1)*Math.PI);
+        let negSinValue = Math.sin(-(this.animationFrame*2-1)*Math.PI);
 
         if (this.animations.current == this.animations.run) {
             let s = 0.4 + (this.curSpeed/this.maxSpeed * 0.5);
-            this.animatedParts.leftLeg.rotation = quat.rotateX([], quat.create(), Math.sin((this.animationFrame*2-1)*Math.PI) * s);
-            this.animatedParts.rightLeg.rotation = quat.rotateX([], quat.create(), Math.sin(-(this.animationFrame*2-1)*Math.PI) * s);
+            this.animatedParts.leftLeg.rotation = quat.rotateX([], quat.create(), sinValue * s);
+            this.animatedParts.rightLeg.rotation = quat.rotateX([], quat.create(), negSinValue * s);
 
             if (this.curSpeed < 6) {
-                this.animatedParts.leftArm.rotation = quat.rotateX([], quat.create(), Math.sin((this.animationFrame*2-1)*Math.PI) * 0.5);
-                this.animatedParts.rightArm.rotation = quat.rotateX([], quat.create(), Math.sin(-(this.animationFrame*2-1)*Math.PI) * 0.5);
+                this.animatedParts.leftArm.rotation = quat.rotateX([], quat.create(), sinValue * 0.5);
+                this.animatedParts.rightArm.rotation = quat.rotateX([], quat.create(), negSinValue * 0.5);
             }
             else {
                 this.animatedParts.leftArm.rotation = quat.rotateX([], quat.create(), 1.5);
@@ -105,8 +108,8 @@ export class Player extends GameObject {
         else if (this.animations.current == this.animations.idle) {
             this.animatedParts.leftLeg.rotation = quat.rotateX([], quat.create(), 0);
             this.animatedParts.rightLeg.rotation = quat.rotateX([], quat.create(), 0);
-            this.animatedParts.leftArm.rotation = quat.rotateY([], quat.create(), Math.sin((this.animationFrame*2-1)*Math.PI) * 0.5);
-            this.animatedParts.rightArm.rotation = quat.rotateY([], quat.create(), Math.sin((this.animationFrame*2-1)*Math.PI) * 0.5);
+            this.animatedParts.leftArm.rotation = quat.rotateY([], quat.create(), sinValue * 0.5);
+            this.animatedParts.rightArm.rotation = quat.rotateY([], quat.create(), negSinValue * 0.5);
         }
         else if (this.animations.current == this.animations.jump) {
             this.animatedParts.leftLeg.rotation = quat.rotateX([], quat.create(), 0.3);

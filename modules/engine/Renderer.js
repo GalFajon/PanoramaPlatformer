@@ -215,26 +215,6 @@ export class Renderer {
         this.UIFactory.drawCounter(uniforms);
     }
 
-    renderWithBasicLighting(scene,camera) {
-        const gl = this.gl;
-
-        const mvpMatrix = this.getViewProjectionMatrix(camera);
-        const { program, uniforms } = this.programs.simple;
-
-        gl.useProgram(program);
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER,null);
-
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-        gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-        gl.uniform4fv(uniforms.uLightPos,[0,30,0]);
-
-        for (const node of scene.nodes) {
-            this.renderNode(node, mvpMatrix, program, uniforms);
-        }
-    }
-
     renderDepthMap(scene,camera) {
         const gl = this.gl;
 
